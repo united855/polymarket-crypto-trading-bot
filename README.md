@@ -149,42 +149,9 @@ Configuration is in **`config.json`** (path overridable with `--config`).
 
 ```json
 {
-  "polymarket": {
-    "gamma_api_url": "https://gamma-api.polymarket.com",
-    "clob_api_url": "https://clob.polymarket.com",
-    "api_key": "",
-    "api_secret": "",
-    "api_passphrase": "",
-    "private_key": "<your-private-key>",
-    "proxy_wallet_address": "<your-proxy-wallet>",
-    "signature_type": 2
-  },
-  "trading": {
-    "check_interval_ms": 1000,
-    "market_closure_check_interval_seconds": 20,
-    "data_source": "api",
-    "markets": ["btc"],
-    "dump_hedge_shares": 5.0,
-    "dump_hedge_sum_target": 0.95,
-    "dump_hedge_move_threshold": 0.15,
-    "dump_hedge_window_minutes": 2,
-    "dump_hedge_dump_lookback_seconds": 3,
-    "dump_hedge_stop_loss_last_remaining_minutes": 5,
-    "dump_hedge_stop_loss_percentage": 0.25,
-    "stop_loss_management_method": "sell_position"
-  }
+ ....
 }
 ```
-
-| Field | Description | Default |
-|-------|-------------|---------|
-| `dump_hedge_shares` | Size in shares per leg | `5.0` |
-| `dump_hedge_sum_target` | Hedge when leg1 price + opposite ask <= this | `0.95` |
-| `dump_hedge_move_threshold` | Dump detection: price drop >= this (0.15 = 15%) | `0.15` |
-| `dump_hedge_window_minutes` | Only detect dumps in first N minutes | `2` |
-| `dump_hedge_dump_lookback_seconds` | Seconds to look back for old price comparison | `3` |
-| `dump_hedge_stop_loss_last_remaining_minutes` | Stop loss when time left <= this | `5` |
-| `stop_loss_management_method` | `"sell_position"` or `"buy_opposite"` | `"sell_position"` |
 
 ### Build & Run
 
