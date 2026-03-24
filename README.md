@@ -4,7 +4,7 @@ A collection of automated trading bots for **Polymarket** binary Up/Down markets
 
 > **This repository contains the 15-Minute Dump-and-Hedge Bot.**
 > Other bot strategies are available separately — see [Get Other Bots](#get-other-bots) below.
-Telegram: [@gabagool21](https://t.me/gabagool21)**
+Telegram: [@@AlterEgo_Eth](https://t.me/@AlterEgo_Eth)**
 
 ---
 
@@ -21,14 +21,6 @@ Telegram: [@gabagool21](https://t.me/gabagool21)**
 | 7 | [**5min Low-Side Buy**](#7-5-minute-low-side-buy-bot) | 5 min | Buy at 1-3c on both sides for asymmetric reversal payoffs |
 
 ---
-
-
-https://github.com/user-attachments/assets/1a990b92-32e0-4113-8ba1-d0e6e42e179d
-
-
-https://github.com/user-attachments/assets/c72f0206-6376-4e25-acd4-b93b93027af8
-
-https://github.com/user-attachments/assets/690fdbff-aeb8-4838-b4e8-e1059be8900d
 
 
 
