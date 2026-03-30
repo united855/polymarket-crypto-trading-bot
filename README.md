@@ -17,7 +17,7 @@
 
 Everything here is provided **for education and experimentation**. Trading prediction markets can result in **total loss** of capital deployed. Past backtests or anecdotal results **do not** predict live performance.
 
-If you want **additional strategies**, **custom deployment**, or **professional risk and sizing frameworks** beyond this open suite, reach out on **[Telegram @AlterEgo_Eth](https://t.me/AlterEgo_Eth)**. If you are looking for **bots oriented toward live profitability**—more advanced signals, sizing, and execution than this public suite—**please contact the same Telegram**; what is available, how it is shared, and any terms are discussed **individually**.
+If you want **additional strategies**, **custom deployment**, or **professional risk and sizing frameworks** beyond this open suite, reach out on **[Telegram @AlterEgo_Eth](https://t.me/AlterEgo_Eth)**. If you are looking for **bots oriented toward live profitability**—more advanced signals, sizing, and execution than this public suite—**please contact the same Telegram**; what is available, how it is shared, and any terms are discussed **individually**
 
 ---
 
