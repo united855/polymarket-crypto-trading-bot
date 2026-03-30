@@ -23,13 +23,13 @@ If you want **additional strategies**, **custom deployment**, or **professional 
 
 ## Bots in this repository
 
+All runnable bots live under [`bots/`](bots/). Each folder has its own **README** (and Meridian has a deep dive under `docs/`). Start there for install paths, env vars, and config.
+
 | Directory | Focus | Markets | Core idea |
 |-----------|--------|---------|-----------|
-| [`btc-binary-VWAP-Momentum-bot/`](btc-binary-VWAP-Momentum-bot/) | VWAP, deviation, momentum, z-score | BTC **5m** or **15m** | Enter the **favorite** only when price has **pulled above VWAP** with **positive momentum** inside a **late, narrow time window**—filtering for “consensus + short-term continuation.” |
-| [`up-down-spread-bot/`](up-down-spread-bot/) (**Meridian**) | Late Entry V3 (`late_v3`) | BTC, ETH, SOL, XRP — **5m** or **15m** | In the **last minutes**, buy the side the book **already favors**, but only if **spread** and **confidence** (ask skew) pass sanity checks; **stop-loss** and **flip-stop** cut bad paths before expiry. |
-| [`5min-15min-PTB-bot/`](5min-15min-PTB-bot/) | PTB diff + probability triggers | BTC **5m** or **15m** | Compare **live BTC** to Polymarket’s **price-to-beat (PTB)** for the window; fire when **time**, **dollar diff**, and **implied probability** align; manage risk with **take-profit / stop-loss** on token prices. |
-
-Each folder has its own **README** (and Meridian has a deep dive under `docs/`). Start there for install paths, env vars, and config.
+| [`bots/btc-binary-VWAP-Momentum-bot/`](bots/btc-binary-VWAP-Momentum-bot/) | VWAP, deviation, momentum, z-score | BTC **5m** or **15m** | Enter the **favorite** only when price has **pulled above VWAP** with **positive momentum** inside a **late, narrow time window**—filtering for “consensus + short-term continuation.” |
+| [`bots/up-down-spread-bot/`](bots/up-down-spread-bot/) (**Meridian**) | Late Entry V3 (`late_v3`) | BTC, ETH, SOL, XRP — **5m** or **15m** | In the **last minutes**, buy the side the book **already favors**, but only if **spread** and **confidence** (ask skew) pass sanity checks; **stop-loss** and **flip-stop** cut bad paths before expiry. |
+| [`bots/5min-15min-PTB-bot/`](bots/5min-15min-PTB-bot/) | PTB diff + probability triggers | BTC **5m** or **15m** | Compare **live BTC** to Polymarket’s **price-to-beat (PTB)** for the window; fire when **time**, **dollar diff**, and **implied probability** align; manage risk with **take-profit / stop-loss** on token prices. |
 
 ---
 
@@ -73,9 +73,9 @@ None of the following is investment advice; it is **mechanics**.
 
 | Situation | Sensible starting point |
 |-----------|-------------------------|
-| You want **one asset (BTC)** and **indicator-style** rules with a **terminal dashboard** | `btc-binary-VWAP-Momentum-bot` |
-| You want **several coins** from **one wallet** and **late-window consensus** with **structured exits** | `up-down-spread-bot` (Meridian) |
-| You care about **PTB vs Chainlink BTC** and **rule-based** triggers with a **web dashboard** | `5min-15min-PTB-bot` |
+| You want **one asset (BTC)** and **indicator-style** rules with a **terminal dashboard** | `bots/btc-binary-VWAP-Momentum-bot` |
+| You want **several coins** from **one wallet** and **late-window consensus** with **structured exits** | `bots/up-down-spread-bot` (Meridian) |
+| You care about **PTB vs Chainlink BTC** and **rule-based** triggers with a **web dashboard** | `bots/5min-15min-PTB-bot` |
 
 You can run more than one bot **only if** you understand **collateral**, **nonce / rate limits**, and **position overlap**—typically use **separate wallets** or **non-overlapping** markets.
 
@@ -98,13 +98,14 @@ These are **not** all shipped as drop-in folders in this public repository. For 
 ```bash
 git clone https://github.com/AlterEgoEth/polymarket-crypto-trading-bot.git
 cd polymarket-crypto-trading-bot
+# All bots live under bots/ — e.g. cd bots/5min-15min-PTB-bot
 ```
 
-Then open the **README** inside the bot you want:
+Then open the **README** inside the bot you want (or start from [`bots/README.md`](bots/README.md)):
 
-- `btc-binary-VWAP-Momentum-bot/README.md`
-- `up-down-spread-bot/README.md` (overview) and `up-down-spread-bot/docs/README.md` (full guide)
-- `5min-15min-PTB-bot/README.md`
+- `bots/btc-binary-VWAP-Momentum-bot/README.md`
+- `bots/up-down-spread-bot/README.md` (overview) and `bots/up-down-spread-bot/docs/README.md` (full guide)
+- `bots/5min-15min-PTB-bot/README.md`
 
 ---
 
