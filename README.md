@@ -1,251 +1,115 @@
-# Polymarket Trading Bot Suite
+# Polymarket Crypto Trading Bot Suite
 
-A collection of automated trading bots for **Polymarket** binary Up/Down markets, built in Rust. These bots exploit short-term mispricings in 5-minute, 15-minute, and 1-hour prediction markets across **BTC, ETH, SOL, and XRP**.
+**Educational and research tooling** for [Polymarket](https://polymarket.com) short-horizon crypto **Up / Down** markets. This repository bundles **three production-style Python bots** with different signal philosophies: microstructure + VWAP (BTC), multi-asset late consensus (BTC/ETH/SOL/XRP), and oracle-vs-strike (PTB) rules with optional intramarket exits.
 
-> **This repository contains the 15-Minute Dump-and-Hedge Bot.**
-> Other bot strategies are available separately — see [Get Other Bots](#get-other-bots) below.
-Telegram: [@@AlterEgo_Eth](https://t.me/@AlterEgo_Eth)**
-
----
-
-## Bot Strategies at a Glance
-
-| # | Bot | Timeframe | Core Idea |
-|---|-----|-----------|-----------|
-| 1 | [**15min Dump & Hedge**](#1-15-minute-dump-and-hedge-bot-current) | 15 min | Detect a price dump, buy the dumped side, then hedge with the opposite side |
-| 2 | [**15min Pre-Order & Mid-Market**](#2-15-minute-pre-order-and-mid-market-bot) | 15 min | Pre-place limit buys on both sides at low prices before the period starts |
-| 3 | [**1hour Pre-Limit Order**](#3-1-hour-pre-limit-order-bot) | 1 hour | Pre-place limit buys on both sides, merge when both fill |
-| 4 | [**1hour Pre-Limit Order & Mid-Market**](#4-1-hour-pre-limit-order-and-mid-market-bot) | 1 hour | Pre-orders + dynamic mid-market orders in the current hour |
-| 5 | [**5min Pre-Order & Mid-Market**](#5-5-minute-pre-order-and-mid-market-bot) | 5 min | Fast pre-orders on both sides for quick 5-minute markets |
-| 6 | [**5min High-Side Buy**](#6-5-minute-high-side-buy-bot) | 5 min | Buy the likely winner (90c+) late in the period, ride momentum |
-| 7 | [**5min Low-Side Buy**](#7-5-minute-low-side-buy-bot) | 5 min | Buy at 1-3c on both sides for asymmetric reversal payoffs |
+| Resource | Link |
+|----------|------|
+| **Repository** | [github.com/AlterEgoEth/polymarket-crypto-trading-bot](https://github.com/AlterEgoEth/polymarket-crypto-trading-bot.git) |
+| **Contact (Telegram)** | [@AlterEgo_Eth](https://t.me/AlterEgo_Eth) |
 
 ---
 
-## Strategy Summaries
+## Who this is for
 
-### 1. 15-Minute Dump and Hedge Bot (CURRENT)
+- **Developers** who want readable Python, WebSocket market data, and CLOB execution patterns to study or extend.
+- **Traders** who understand that **no bot guarantees profit** and who will paper-test, size small, and own their risk.
+- **Clients / integrators** evaluating automation on Polymarket-compatible flows (wallet, API keys, redeem paths).
 
-> **This is the bot included in this repository.**
+Everything here is provided **for education and experimentation**. Trading prediction markets can result in **total loss** of capital deployed. Past backtests or anecdotal results **do not** predict live performance.
 
-Monitors 15-minute Up/Down markets and detects sudden price drops ("dumps"). When one side's ask price drops sharply (e.g. 15%+ in 3 seconds), the bot buys that side immediately. It then waits for the opposite side to become cheap enough that the combined cost is below a target (e.g. $0.95). If both legs fill, you hold both outcomes for under $1, guaranteeing profit at resolution ($1 payout). If the hedge doesn't come in time, a stop-loss kicks in.
-
-**Key parameters:** dump threshold, hedge sum target, lookback window, stop-loss timing.
-
-> **Strategy credit:** Based on [The Smart Ape's](https://x.com/the_smart_ape) two-leg catching-and-hedging strategy for Polymarket BTC 15-minute UP/DOWN markets ([original tweet](https://x.com/the_smart_ape/status/2005576087875527082) · [detailed write-up on Lookonchain](https://www.lookonchain.com/articles/1209)). The Smart Ape's approach — detect a sharp dump on one side, buy it, then hedge by buying the opposite side when the combined cost is below $1 — achieved ~86% ROI in backtesting. This bot is a Rust implementation of that core idea with added stop-loss management, multi-asset support, and automatic redemption.
-
-**Real Results:*
-
-
-
-[Read full strategy details ->](docs/15min-dump-and-hedge.md)
+If you want **additional strategies**, **custom deployment**, or **professional risk and sizing frameworks** beyond this open suite, reach out on **[Telegram @AlterEgo_Eth](https://t.me/AlterEgo_Eth)**. If you are looking for **bots oriented toward live profitability**—more advanced signals, sizing, and execution than this public suite—**please contact the same Telegram**; what is available, how it is shared, and any terms are discussed **individually**.
 
 ---
 
-### 2. 15-Minute Pre-Order and Mid-Market Bot
+## Bots in this repository
 
-Places limit BUY orders for **both Up and Down** at a low price (e.g. $0.45 each) before the next 15-minute period starts. If both fill, total cost < $1 and profit is locked in. Also places mid-market orders in the current period using dynamic pricing derived from live sell prices. Signal-based filters skip orders when the market is already one-sided.
+| Directory | Focus | Markets | Core idea |
+|-----------|--------|---------|-----------|
+| [`btc-binary-VWAP-Momentum-bot/`](btc-binary-VWAP-Momentum-bot/) | VWAP, deviation, momentum, z-score | BTC **5m** or **15m** | Enter the **favorite** only when price has **pulled above VWAP** with **positive momentum** inside a **late, narrow time window**—filtering for “consensus + short-term continuation.” |
+| [`up-down-spread-bot/`](up-down-spread-bot/) (**Meridian**) | Late Entry V3 (`late_v3`) | BTC, ETH, SOL, XRP — **5m** or **15m** | In the **last minutes**, buy the side the book **already favors**, but only if **spread** and **confidence** (ask skew) pass sanity checks; **stop-loss** and **flip-stop** cut bad paths before expiry. |
+| [`5min-15min-PTB-bot/`](5min-15min-PTB-bot/) | PTB diff + probability triggers | BTC **5m** or **15m** | Compare **live BTC** to Polymarket’s **price-to-beat (PTB)** for the window; fire when **time**, **dollar diff**, and **implied probability** align; manage risk with **take-profit / stop-loss** on token prices. |
 
-**Key parameters:** price limit, signal stable range, sell-opposite timing, danger price.
-
-**Real Results:**
-
-
-[Read full strategy details ->](docs/15min-pre-order-mid-market.md)
-
----
-
-### 3. 1-Hour Pre-Limit Order Bot
-
-Targets 1-hour Up/Down markets. Places limit BUY orders on both sides at a fixed price before the next hour begins. When both sides fill, positions are **merged** (redeemed back to USDC) to lock in profit immediately without waiting for market resolution. Danger and timeout exits protect against one-sided fills.
-
-**Key parameters:** price limit, merge logic, danger price, timeout.
-
-**Real Results:**
-
-![1hour Pre-Limit Results](docs/screenshots/1hour-pre-limit-order-result.png)
-
-[Read full strategy details ->](docs/1hour-pre-limit-order.md)
+Each folder has its own **README** (and Meridian has a deep dive under `docs/`). Start there for install paths, env vars, and config.
 
 ---
 
-### 4. 1-Hour Pre-Limit Order and Mid-Market Bot
+## Why these approaches can make money (and when they do not)
 
-Extends the 1-hour pre-limit strategy with **dynamic mid-market orders** during the current hour. The cheaper side is bought at its current sell price; the opposite side gets a small discount. Combined with pre-orders for the next hour, this maximizes fill opportunities. Same merge and risk management as the pre-limit bot.
+None of the following is investment advice; it is **mechanics**.
 
-**Key parameters:** price limit, opposite-side discount, mid-market enabled, signal.
+### 1. VWAP + momentum (BTC binary bot)
 
-**Real Results:**
+- **Economic story:** In the last slice of a binary window, the “favorite” often trades at a **high implied probability** (e.g. $0.75–$0.88). If the crowd is **directionally right often enough**, buying the favorite can have **positive expectancy** even though each win is small in dollar terms per share.
+- **Why filters matter:** Requiring **deviation from VWAP** and **positive momentum** tries to avoid **chasing stale prices** and favors entries where **recent flow** supports the favorite.
+- **Failure modes:** Sharp reversals into the close, thin books, or regimes where **implied odds are miscalibrated** can make “favorite following” lose fast. Break-even win rate ≈ **entry price** (e.g. $0.82 entry ⇒ need ~82% wins before fees).
 
-[Read full strategy details ->](docs/1hour-pre-limit-order-mid-market.md)
+### 2. Late consensus + skew (Meridian / `late_v3`)
 
----
+- **Economic story:** Nearer expiry, **information about the fixing** is more concentrated in prices; the order book’s **ask skew** (`|up_ask − down_ask|`) is used as a **confidence** proxy. You trade **less time exposed** but pay **higher prices** when consensus is strong.
+- **Risk layer:** **Per-market investment cap**, **max entry price**, **stop-loss** (fixed or percent), and **flip-stop** (exit if your side loses “favorite” status) are explicit **risk overrides**—they can cap damage but also **stop out** before a recovery.
+- **Failure modes:** **Last-minute noise**, oracle quirks, or **one-sided liquidity** can flip perceived favorites. **Spread > ~$1.05** is treated as unreliable in the default logic.
 
-### 5. 5-Minute Pre-Order and Mid-Market Bot
+### 3. PTB distance + probability bands (5m/15m PTB bot)
 
-Same concept as the 15-minute pre-order bot, adapted for the faster 5-minute markets. Places limit buys on both sides at low prices before the next period. The 5-minute timeframe means thinner liquidity and more frequent opportunities, but also requires faster signal evaluation and tighter risk management.
-
-**Key parameters:** price limit, sell-opposite threshold and timing (in seconds), signal range.
-
-**Real Results:**
-
-[Read full strategy details ->](docs/5min-pre-order-mid-market.md)
-
----
-
-### 6. 5-Minute High-Side Buy Bot
-
-When one side is strongly favored (bid >= 90c+) late in a 5-minute period, the bot buys that side — betting the market consensus is right with limited time to reverse. If the price drops below a floor, the bot sells or hedges with the opposite side. Per-asset configuration allows different thresholds and behaviors.
-
-**Key parameters:** threshold, after seconds, sell-under price, hedge (opposite) enabled.
-
-
-
-
-[Read full strategy details ->](docs/5min-high-side-buy.md)
+- **Economic story:** If **spot** is consistently **on one side of PTB** by **$X** late in the window, the **UP** or **DOWN** token may still be **underpriced** vs that physical gap—rules try to catch **alignment** between **oracle BTC**, **strike**, and **token price**.
+- **Risk layer:** After a fill, **take-profit** and **stop-loss** are defined in **probability space** (token price), aiming to **lock in gains** or **cut losses** before resolution.
+- **Failure modes:** **Lag** between feeds, **PTB definition** vs your intuition, and **simulation vs live** fill behavior. Always validate with **`SIMULATION_MODE=true`** first.
 
 ---
 
-### 7. 5-Minute Low-Side Buy Bot
+## Risk management (summary)
 
-Places limit buys at very low prices (1c, 2c, 3c) on **both** Up and Down. Each fill is a cheap lottery ticket: risk 1-3c to potentially make 97-99c if that side wins. Take-profit tiers (e.g. sell 50% at 10c, rest at 15c) lock in multi-x returns even without holding to expiry. Unfilled orders are automatically cancelled near market close.
+| Bot | Primary levers |
+|-----|----------------|
+| **VWAP / momentum** | Price band (`min_price` / `max_price`), **narrow entry window**, **bet size**, optional **hedge** (opposite-side GTD), **FAK** execution with retries, **max entry price** cap. |
+| **Meridian** | **Dry run**, **max order / total investment**, **entry window**, **confidence** and **spread** gates, **stop-loss**, **flip-stop**, **entry frequency**, **FAK / FOK** execution behavior. |
+| **PTB bot** | **Simulation mode**, **per-trade USDC**, **TP/SL** on probability, **trigger** windows, **market lag** limits, **loop** cadence. |
 
-**Key parameters:** entry prices, take-profit tiers, cancel-unfilled timing.
-
-**Real Results:**
-
-
-[Read full strategy details ->](docs/5min-low-side-buy.md)
+**Operational hygiene:** dedicated wallet, **never commit keys**, private **RPC**, monitor **logs**, start with **minimum size**.
 
 ---
 
-## Current Bot: 15-Minute Dump and Hedge
+## When to use which bot
 
-This repository contains the **15-Minute Dump-and-Hedge Bot**. Below is everything you need to get it running.
+| Situation | Sensible starting point |
+|-----------|-------------------------|
+| You want **one asset (BTC)** and **indicator-style** rules with a **terminal dashboard** | `btc-binary-VWAP-Momentum-bot` |
+| You want **several coins** from **one wallet** and **late-window consensus** with **structured exits** | `up-down-spread-bot` (Meridian) |
+| You care about **PTB vs Chainlink BTC** and **rule-based** triggers with a **web dashboard** | `5min-15min-PTB-bot` |
 
-### Prerequisites
+You can run more than one bot **only if** you understand **collateral**, **nonce / rate limits**, and **position overlap**—typically use **separate wallets** or **non-overlapping** markets.
 
-- **Rust** (e.g. 1.70+): install from [rustup.rs](https://rustup.rs)
-- **Polymarket account** and API credentials (for production)
-- **Proxy wallet** and **private key** (for signing and redeeming)
+---
 
-### Configuration
+## Extended strategies & quant stack (separate offerings)
 
-Configuration is in **`config.json`** (path overridable with `--config`).
+Beyond the three open-source-style bots in this tree, **AlterEgo Eth** maintains **additional strategies** used in professional workflows, including:
 
-```json
-{
- ....
-}
-```
+- **Position sizing & sequences:** martingale, anti-martingale, Fibonacci scaling (each with different **blow-up** and **recovery** profiles—**not** risk-free).
+- **Technical analysis:** RSI, MACD, Bollinger Bands (and combinations with **regime filters**).
+- **Probabilistic & execution-aware models:** Bayesian updating of beliefs, **edge** estimation vs market price, **spread** and liquidity-aware quoting, **Avellaneda–Stoikov–style** inventory / skew control, **Kelly**-style sizing (often **fractional Kelly** in practice), **Monte Carlo** scenario analysis for drawdown and tail risk.
 
-### Build & Run
+These are **not** all shipped as drop-in folders in this public repository. For **access, customization, licensing, or collaboration**, contact **[Telegram: @AlterEgo_Eth](https://t.me/AlterEgo_Eth)**.
+
+---
+
+## Quick start (from clone)
 
 ```bash
-cargo build --release
+git clone https://github.com/AlterEgoEth/polymarket-crypto-trading-bot.git
+cd polymarket-crypto-trading-bot
 ```
 
-**Simulation (no real orders):**
+Then open the **README** inside the bot you want:
 
-```bash
-./target/release/polymarket-arbitrage-bot --simulation
-```
-
-**Production (live trading):**
-
-```bash
-./target/release/polymarket-arbitrage-bot --production --config config.json
-```
-
-### Redeem Mode
-
-After a 15m market resolves, redeem winning positions:
-
-```bash
-./target/release/polymarket-arbitrage-bot --redeem --config config.json
-```
-
-Redeem a specific condition:
-
-```bash
-./target/release/polymarket-arbitrage-bot --redeem --condition-id 0x... --config config.json
-```
-
-### Running with PM2
-
-```javascript
-// ecosystem.config.cjs
-module.exports = {
-  apps: [{
-    name: "polymarket-bot",
-    script: "./target/release/polymarket-arbitrage-bot",
-    args: "--production --config config.json",
-    cwd: __dirname,
-    interpreter: "none",
-    autorestart: true,
-    watch: false,
-    max_memory_restart: "500M",
-  }],
-};
-```
-
-```bash
-pm2 start ecosystem.config.cjs
-pm2 logs polymarket-bot
-```
-
-### Logging
-
-- **Stderr:** Main log stream (info level).
-- **`history.toml`:** Append-only run log in the working directory.
-- **RUST_LOG:** `RUST_LOG=info` (default) or `RUST_LOG=debug` for more detail.
-
-### Supported Markets
-
-Configured via `trading.markets` in `config.json`:
-
-- `btc` — Bitcoin 15m Up/Down
-- `eth` — Ethereum 15m Up/Down
-- `sol` — Solana 15m Up/Down
-- `xrp` — XRP 15m Up/Down
-
-### Security
-
-- **Never commit real keys.** Keep `config.json` out of version control.
-- **`private_key`** controls funds; restrict file permissions and use a dedicated trading wallet.
-
-### File Layout
-
-| Path | Purpose |
-|------|---------|
-| `config.json` | Polymarket and trading settings |
-| `src/main.rs` | Entry point, CLI, market discovery, redeem |
-| `src/dump_hedge_trader.rs` | Dump-and-hedge strategy and state |
-| `src/monitor.rs` | Market data (API/WebSocket) and snapshots |
-| `src/api.rs` | Polymarket CLOB/Gamma API client |
-| `src/config.rs` | Config and CLI parsing |
-| `src/models.rs` | Market/token data structures |
-| `docs/` | Detailed strategy documentation for all bots |
+- `btc-binary-VWAP-Momentum-bot/README.md`
+- `up-down-spread-bot/README.md` (overview) and `up-down-spread-bot/docs/README.md` (full guide)
+- `5min-15min-PTB-bot/README.md`
 
 ---
 
-## Get Other Bots
+## License & disclaimer
 
-This repository only includes the **15-Minute Dump-and-Hedge Bot**.
+Individual bots may ship their own **LICENSE**; where none is specified, treat usage as **at your own risk**. Authors and contributors are **not** responsible for trading losses, bugs, exchange rule changes, or regulatory issues in your jurisdiction.
 
-If you are interested in any of the other strategies:
-
-- 15-Minute Pre-Order & Mid-Market Bot
-- 1-Hour Pre-Limit Order Bot
-- 1-Hour Pre-Limit Order & Mid-Market Bot
-- 5-Minute Pre-Order & Mid-Market Bot
-- 5-Minute High-Side Buy Bot
-- 5-Minute Low-Side Buy Bot
-
-**Please contact me on Telegram: [@gabagool21](https://t.me/gabagool21)**
-
----
-
-## Disclaimer
-
-These bots are for educational and research purposes. Trading on prediction markets involves risk. Use at your own risk; the authors are not responsible for financial losses. Always test with `simulation_mode: true` and small sizes before live trading.
+**Not financial advice.** **No warranty.** Use **simulation / dry-run** until you trust the full stack.
