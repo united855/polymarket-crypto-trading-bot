@@ -1,4 +1,4 @@
-# Polymarket Crypto Trading Bot Suite
+# Polymarket Crypto Trading Bot Suite.
 
 **Educational and research tooling** for [Polymarket](https://polymarket.com) short-horizon crypto **Up / Down** markets. This repository bundles **three production-style Python bots** with different signal philosophies: microstructure + VWAP (BTC), multi-asset late consensus (BTC/ETH/SOL/XRP), and oracle-vs-strike (PTB) rules with optional intramarket exits.
 
